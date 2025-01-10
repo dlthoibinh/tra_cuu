@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Đăng nhập MD5</title>
+</head>
+<body>
+  <h1>Trang đăng nhập</h1>
+  <label for="pwd">Mật khẩu:</label><br>
+  <input type="password" id="pwd" />
+  <button onclick="dangNhap()">Đăng nhập</button>
+
+  <div id="status"></div>
+
+  <!-- Lib băm MD5 client side -->
+  <script src="https://cdn.jsdelivr.net/npm/blueimp-md5@2.21.0/js/md5.min.js"></script>
+
+  <script>
+    // URL Web App Apps Script
+    const WEB_APP_URL = "PASTE_YOUR_WEB_APP_EXEC_URL_HERE";
+
+    async function dangNhap() {
+      const password = document.getElementById("pwd").value.trim();
+      if (!password) {
+        alert("Vui lòng nhập mật khẩu!");
+        return;
+      }
+
+      // Băm MD5 mật khẩu trên client
+      const hashed = md5(password);
+      console.log("MD5:", hashed);
+
+      // Gửi POST lên Web App
+      const payload = {
+        action: "login",
+        hash: hashed
+      };
+
+      try {
+        const response = await fetch(WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        console.log("Server response:", data);
+
+        if (data.status === "success") {
+          // Đăng nhập OK
+          document.getElementById("status").innerHTML = "Đăng nhập thành công!";
+
+          // Chuyển sang trang tìm kiếm (timKiem.html)
+          window.location.href = "timKiem.html";
+        } else {
+          // Sai password
+          alert("Đăng nhập thất bại: " + (data.error || "Sai mật khẩu"));
+        }
+      } catch (err) {
+        alert("Có lỗi xảy ra: " + err);
+      }
+    }
+  </script>
+</body>
+</html>
