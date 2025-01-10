@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Tìm kiếm khách hàng</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input[type="text"] {
+      width: 400px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #results {
+      margin-top: 20px;
+      text-align: left;
+      display: inline-block;
+      width: 100%;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tìm kiếm khách hàng</h1>
+  <input type="text" id="search" placeholder="Nhập từ khóa tìm kiếm...">
+  <button onclick="timKiem()">Tìm kiếm</button>
+  <div id="results"></div>
+
+  <script>
+    const WEB_APP_URL = "PASTE_YOUR_WEB_APP_EXEC_URL_HERE";
+
+    async function timKiem() {
+      const searchValue = document.getElementById("search").value.trim();
+      if (!searchValue) {
+        alert("Vui lòng nhập từ khóa!");
+        return;
+      }
+
+      // Gửi POST: { action: "timKiem", searchValue: "..." }
+      const payload = {
+        action: "timKiem",
+        searchValue: searchValue
+      };
+
+      try {
+        const response = await fetch(WEB_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const resultJson = await response.json();
+
+        if (resultJson.status !== "success") {
+          alert("Có lỗi: " + (resultJson.error || "Không thể tìm kiếm"));
+          return;
+        }
+
+        const data = resultJson.data; // Mảng kết quả
+        hienKetQua(data);
+      } catch (err) {
+        alert("Lỗi fetch: " + err);
+      }
+    }
+
+    function hienKetQua(data) {
+      const resultsDiv = document.getElementById("results");
+      if (!data || data.length === 0) {
+        resultsDiv.innerHTML = "<p>Không tìm thấy kết quả.</p>";
+        return;
+      }
+      const table = `
+        <table>
+          <tr>
+            <th>Mã KH</th>
+            <th>Mã Sổ GCS</th>
+            <th>Tên KH</th>
+            <th>Địa chỉ</th>
+            <th>Số TB</th>
+            <th>Danh Số</th>
+            <th>Điện thoại DV</th>
+            <th>Tên đăng nhập</th>
+            <th>Password</th>
+            <th>Tên Trạm</th>
+            <th>Mã Trạm</th>
+            <th>Đội</th>
+            <th>DCU</th>
+            <th>No DCU</th>
+            <th>Thuộc 3,6T</th>
+            <th>Công nợ</th>
+            <th>Sản Lượng</th>
+            <th>Chỉ số mới</th>
+            <th>Ghi tay</th>
+          </tr>
+          ${data.map(row => `
+            <tr>
+              <td>${row.MA_KHANG || ""}</td>
+              <td>${row.MA_SOGCS || ""}</td>
+              <td>${row.TEN_KHANG || ""}</td>
+              <td>${row.DCHI_DDO || ""}</td>
+              <td>${row.SO_TBI || ""}</td>
+              <td>${row.TTIN_HTHI || ""}</td>
+              <td>${row.DTHOAI_DVU || ""}</td>
+              <td>${row.TEN_DANG_NHAP || ""}</td>
+              <td>${row.PASSWORD || ""}</td>
+              <td>${row.TEN_TRAM || ""}</td>
+              <td>${row.MA_TRAM || ""}</td>
+              <td>${row.DOI || ""}</td>
+              <td>${row.DCU || ""}</td>
+              <td>${row.NO_DCU || ""}</td>
+              <td>${row.THUOC_3_6T || ""}</td>
+              <td>${row.TONG_TIEN || ""}</td>
+              <td>${row.CHISO_CU || ""}</td>
+              <td>${row.CHISO_MOI || ""}</td>
+              <td>${row.GHITAY || ""}</td>
+            </tr>
+          `).join('')}
+        </table>
+      `;
+      resultsDiv.innerHTML = table;
+    }
+  </script>
+</body>
+</html>
